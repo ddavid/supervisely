@@ -1,0 +1,10 @@
+[
+    {
+        "title": "settings",
+        "type": "import",
+        "config": {
+            "normalize_exif": true,
+            "watermark-logo": "logo.png"
+    }
+  }
+]
