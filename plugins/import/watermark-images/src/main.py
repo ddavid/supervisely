@@ -39,13 +39,8 @@ def convert():
 
     convert_options = task_settings['options']
 
-    for dataset in in_datasets:
-        watermark_logo = cv2.imread(convert_options['watermark-logo'])
-        for img in dataset:
-            img = watermark(img, watermark_logo)
-
-
     normalize_exif = convert_options.get('normalize_exif')
+    logo_file_name = convert_options.get('watermark-logo')
 
     pr = sly.Project(os.path.join(sly.TaskPaths.RESULTS_DIR, task_settings['res_names']['project']),
                      sly.OpenMode.CREATE)
@@ -53,7 +48,12 @@ def convert():
     for ds_name, img_paths in in_datasets.items():
         sly.logger.info(
             'Found {} files with supported image extensions in Dataset {!r}.'.format(len(img_paths), ds_name))
-
+        # Read watermark logo image
+        #logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
+        #assert(len(logo_path) is 1)
+        #logo_path = logo_path.pop()
+        #logo_img = sly.image.read(logo_path)
+        
         ds = pr.create_dataset(ds_name)
         progress = sly.Progress('Dataset: {!r}'.format(ds_name), len(img_paths))
         for img_path in img_paths:
@@ -62,6 +62,7 @@ def convert():
 
                 if normalize_exif:
                     img = sly.image.read(img_path)
+                    #img = watermark(img, logo_img)
                     sly.image.write(img_path, img)
 
                 ds.add_item_file(item_name, img_path, _use_hardlink=True)
@@ -108,4 +109,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sly.main_wrapper('IMPORT_IMAGES', main)
+    sly.main_wrapper('WATERMARK_IMPORT_IMAGES', main)
