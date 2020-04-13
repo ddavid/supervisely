@@ -1,8 +1,12 @@
 # coding: utf-8
 
 import os
-from collections import defaultdict
+import time
+
 import cv2
+import numpy as np
+from collections import defaultdict
+from PIL import Image, ImageDraw, ImageFont
 
 import supervisely_lib as sly
 from supervisely_lib import fs
@@ -10,7 +14,16 @@ from supervisely_lib import TaskPaths
 from supervisely_lib.io.json import load_json_file
 
 
+
 DEFAULT_DS_NAME = 'ds'
+
+# Watermark text constants
+FONT_PATH = '/workdir/fonts/Arial.ttf'
+FONT_SIZE = 16
+
+# Don't change this one
+FSOCO_IMPORT_BORDER_THICKNESS = 140
+FSOCO_IMPORT_LOGO_HEIGHT = 100
 
 
 def find_input_datasets():
@@ -49,21 +62,31 @@ def convert():
         sly.logger.info(
             'Found {} files with supported image extensions in Dataset {!r}.'.format(len(img_paths), ds_name))
         # Read watermark logo image
-        #logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
-        #assert(len(logo_path) is 1)
-        #logo_path = logo_path.pop()
-        #logo_img = sly.image.read(logo_path)
+        logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
+        assert(len(logo_path) is 1)
+        logo_path = logo_path.pop()
+        logo_img = sly.image.read(logo_path)
         
         ds = pr.create_dataset(ds_name)
         progress = sly.Progress('Dataset: {!r}'.format(ds_name), len(img_paths))
         for img_path in img_paths:
             try:
-                item_name = os.path.basename(img_path)
+                if not img_path == logo_path:
+                    watermark_date = last_modified = time.ctime(os.path.getmtime(img_path))
+                    creation_time = time.ctime(os.path.getctime(img_path))
+                    if not last_modified:
+                        watermark_date = creation_time
+                    item_name = os.path.basename(img_path)
 
-                if normalize_exif:
-                    img = sly.image.read(img_path)
-                    #img = watermark(img, logo_img)
-                    sly.image.write(img_path, img)
+                    if normalize_exif:
+                        img = sly.image.read(img_path)
+                        img = watermark(img, logo_img, watermark_date)
+                        sly.image.write(img_path, img)
+                    
+                    else:
+                        img = cv2.imread(img_path)
+                        img = watermark(img, logo_img, watermark_date)
+                        cv2.imwrite(img_path, img)
 
                 ds.add_item_file(item_name, img_path, _use_hardlink=True)
             except Exception as e:
@@ -78,7 +101,10 @@ def convert():
     if pr.total_items == 0:
         raise RuntimeError('Result project is empty! All input images have unsupported format!')
 
-def watermark(img, logo):
+def watermark(img, logo, watermark_text):
+
+    # Resize logo
+    logo = resize_logo(logo)
 
     # Dimension stuff
     img_height = img.shape[0]
@@ -86,23 +112,83 @@ def watermark(img, logo):
     img_width = img.shape[1]
     logo_width = logo.shape[1]
     width_diff = img_width - logo_width
-    # print("Width Difference: ", width_diff)
+    logo_border_diff = FSOCO_IMPORT_BORDER_THICKNESS - FSOCO_IMPORT_LOGO_HEIGHT
 
     # Border dimensions
-    top = bottom = left = right = logo_height
+    top = bottom = left = right = FSOCO_IMPORT_BORDER_THICKNESS
     # Make borders
     img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_ISOLATED)
     # Pad logo for easier concatenating
-    logo = cv2.copyMakeBorder(logo, 0, 0, 0, (width_diff + logo_height), cv2.BORDER_ISOLATED)
+    logo = cv2.copyMakeBorder(logo, 0, 0, 0, (width_diff + FSOCO_IMPORT_BORDER_THICKNESS), cv2.BORDER_ISOLATED)
 
-    #fsoco = cv.resize(fsoco, (logo_height, logo_height))
-
+    #fsoco = cv2.resize(fsoco, (logo_height, logo_height))
+    
+    # Update image shape after borders have been updated
+    img_height = img.shape[0]
+    # Insert logo into image
     #img[0:logo_height, :logo_height] = fsoco
-    img[img_height:(img_height + logo_height), logo_height:] = logo
-
+    # print(img_height)
+    img[(img_height - FSOCO_IMPORT_BORDER_THICKNESS):img_height - logo_border_diff, FSOCO_IMPORT_BORDER_THICKNESS:] = logo 
+    # Length of this static text (Arial) in pixel 
+    # See https://www.math.utah.edu/~beebe/fonts/afm-widths.html
+    txt_len  = 180 
+    # Add text for creation and modification time
+    # Text's anchor is its bottom left corner
+    text_anchor_top = (FSOCO_IMPORT_BORDER_THICKNESS, img_height - 30)
+    text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
+    
+    anchors = [text_anchor_top, text_anchor_bot]
+    texts = ["Created on:", watermark_text]
+    img = draw_text_on_img(img, anchors, texts)
     return img
 
 
+def resize_logo(img_logo):
+
+    # Resize while keeping aspect ratio
+    # FSOCO_IMPORT_LOGO_HEIGHT / image_height
+    scale_pct = FSOCO_IMPORT_LOGO_HEIGHT / float(img_logo.shape[0])
+    resized_width = int(img_logo.shape[1] * scale_pct)
+   
+    resized_img_logo = cv2.resize(img_logo, (resized_width, FSOCO_IMPORT_LOGO_HEIGHT))
+    
+    return resized_img_logo
+    
+       
+def draw_text_on_img(cv_img, anchors, texts):
+    
+    assert(len(anchors) is len(texts))
+    pil_img = cvmat_to_pil(cv_img)
+    font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+    
+    pil_draw = ImageDraw.Draw(pil_img)
+    
+    for anchor, text in zip(anchors, texts):
+      pil_draw.text(anchor, text, font=font, fill=(255, 255, 255))
+      
+    cv_img = pil_to_cvmat(pil_img)
+    return cv_img
+    
+def pil_to_cvmat(pil_img):
+    # From https://stackoverflow.com/questions/43232813/convert-opencv-image-format-to-pil-image-format
+    # use numpy to convert the pil_image into a numpy array
+    np_img=np.array(pil_img)  
+
+    # convert to a opencv image, notice the COLOR_RGB2BGR which means that 
+    # the color is converted from RGB to BGR format
+    cv_img=cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR) 
+    
+    return cv_img
+
+def cvmat_to_pil(cv_img):
+    # From https://stackoverflow.com/questions/43232813/convert-opencv-image-format-to-pil-image-format
+    # convert from opencv to PIL. Notice the COLOR_BGR2RGB which means that 
+    # the color is converted from BGR to RGB
+    pil_img=Image.fromarray(cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB))
+    
+    return pil_img
+    
+    
 def main():
     convert()
     sly.report_import_finished()
