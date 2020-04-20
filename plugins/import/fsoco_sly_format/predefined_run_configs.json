@@ -1,0 +1,9 @@
+[
+    {
+        "title": "settings",
+        "type": "import",
+        "config": {
+            "watermark-logo": "logo.png"
+    }
+  }
+]
