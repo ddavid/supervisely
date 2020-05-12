@@ -18,7 +18,7 @@ from supervisely_lib.io.json import load_json_file
 DEFAULT_DS_NAME = 'ds'
 
 # Watermark text constants
-FONT_PATH = '/workdir/fonts/Arial.ttf'
+FONT_PATH = '/workdir/fonts/VeraMono.ttf'
 FONT_SIZE = 16
 
 # Don't change this one
