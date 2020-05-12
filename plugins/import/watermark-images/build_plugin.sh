@@ -1,6 +1,9 @@
+#!/usr/bin/env bash
+
 REGISTRY=$1
 OWN_REGISTRY=$2
 MODULE_PATH=$3
+SLY_LIB_PATH=$4
 
 VERSION_FILE=$(cat "${MODULE_PATH}/VERSION")
 IMAGE_NAME=${VERSION_FILE%:*}
@@ -28,6 +31,7 @@ docker build \
 	--build-arg "MODULE_PATH=${MODULE_PATH}" \
 	--build-arg "REGISTRY=${REGISTRY}" \
 	--build-arg "TAG=latest" \
+	--build-arg "SLY_LIB_PATH=~/github-repos/supervisely/supervisely_lib" \
 	-f "${MODULE_PATH}/Dockerfile" \
 	-t ${DOCKER_IMAGE} \
 	.
