@@ -9,8 +9,6 @@ COPY $MODULE_PATH /workdir
 COPY $SLY_LIB_PATH /workdir/supervisely_lib
 ##### Fonts for watermarking #####
 COPY fonts /workdir/fonts
-##### FSOCO JSON template meta file #####
-COPY meta.json /workdir/src
 
 ENV PYTHONPATH /workdir:/workdir/src:/workdir/supervisely_lib/worker_proto:$PYTHONPATH
 WORKDIR /workdir/src

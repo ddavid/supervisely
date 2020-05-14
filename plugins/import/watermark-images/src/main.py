@@ -58,10 +58,11 @@ def convert():
 
     pr = sly.Project(os.path.join(sly.TaskPaths.RESULTS_DIR, task_settings['res_names']['project']),
                      sly.OpenMode.CREATE)
-    # Set meta file to FSOCO template
+    # Set meta file to FSOCO template at end to avoid being set to default-initialized ProjectMeta
     meta_json = load_json_file("meta.json")
-    pr._meta = ProjectMeta.from_json(meta_json)
-
+    pr.set_meta(ProjectMeta.from_json(meta_json))
+    sly.logger.info(
+        'Set project meta file to FSOCO template.')
     for ds_name, img_paths in in_datasets.items():
         # Read watermark logo image
         logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
