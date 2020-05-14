@@ -12,6 +12,7 @@ import supervisely_lib as sly
 from supervisely_lib import fs
 from supervisely_lib import TaskPaths
 from supervisely_lib.io.json import load_json_file
+from supervisely_lib.project.project_meta import ProjectMeta
 
 
 
@@ -57,6 +58,9 @@ def convert():
 
     pr = sly.Project(os.path.join(sly.TaskPaths.RESULTS_DIR, task_settings['res_names']['project']),
                      sly.OpenMode.CREATE)
+    # Set meta file to FSOCO template
+    meta_json = load_json_file("meta.json")
+    pr._meta = ProjectMeta.from_json(meta_json)
 
     for ds_name, img_paths in in_datasets.items():
         sly.logger.info(
