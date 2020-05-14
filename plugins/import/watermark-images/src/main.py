@@ -54,7 +54,7 @@ def convert():
     convert_options = task_settings['options']
 
     normalize_exif = convert_options.get('normalize_exif')
-    logo_file_name = convert_options.get('watermark-logo')
+    logo_file_name = "logo.png"
 
     pr = sly.Project(os.path.join(sly.TaskPaths.RESULTS_DIR, task_settings['res_names']['project']),
                      sly.OpenMode.CREATE)
@@ -63,14 +63,15 @@ def convert():
     pr._meta = ProjectMeta.from_json(meta_json)
 
     for ds_name, img_paths in in_datasets.items():
-        sly.logger.info(
-            'Found {} files with supported image extensions in Dataset {!r}.'.format(len(img_paths), ds_name))
         # Read watermark logo image
         logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
         assert(len(logo_path) is 1)
         logo_path = logo_path.pop()
         logo_img = sly.image.read(logo_path)
-        
+        # Filter out logo file to avoid adding it to the dataset
+        img_paths = [path for path in img_paths if not path.endswith(logo_file_name)]
+        sly.logger.info(
+            'Found {} files with supported image extensions in Dataset {!r}.'.format(len(img_paths), ds_name))
         ds = pr.create_dataset(ds_name)
         progress = sly.Progress('Dataset: {!r}'.format(ds_name), len(img_paths))
         for img_path in img_paths:
