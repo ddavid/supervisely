@@ -50,21 +50,23 @@ def watermark(img, logo, watermark_text):
     # print(img_height)
     img[(img_height - FSOCO_IMPORT_BORDER_THICKNESS):img_height - logo_border_diff,
     FSOCO_IMPORT_BORDER_THICKNESS:] = logo
-    # Length of this static text (Arial) in pixel
+    # Length of this static text (Vera) in pixel
     # See https://www.math.utah.edu/~beebe/fonts/afm-widths.html
-    txt_len = 180
+    txt_len = 250
     # Add text for creation and modification time
     # Text's anchor is its bottom left corner
-    text_anchor_top = (FSOCO_IMPORT_BORDER_THICKNESS, img_height - 30)
-    text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
+    text_anchor = (FSOCO_IMPORT_BORDER_THICKNESS, img_height - 30)
+    #text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
 
-    anchors = [text_anchor_top, text_anchor_bot]
-    texts = ["Uploaded on:", watermark_text]
+    anchors = [text_anchor]
+    texts = ["Uploaded on:  UTC  " + watermark_text]
     img = draw_text_on_img(img, anchors, texts)
     return img
 
 
 def resize_logo(img_logo):
+    # Add black border to the top side to introduce a gap between the logo and the image
+    img_logo = cv2.copyMakeBorder(img_logo, 10, 0, 0, 0, cv.BORDER_CONSTANT, value=[0, 0, 0])
     # Resize while keeping aspect ratio
     # FSOCO_IMPORT_LOGO_HEIGHT / image_height
     scale_pct = FSOCO_IMPORT_LOGO_HEIGHT / float(img_logo.shape[0])

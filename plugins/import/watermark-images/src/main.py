@@ -66,11 +66,11 @@ def convert():
         # Read watermark logo image
         logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
         if len(logo_path) != 1:
-            print("You either have no logo in the project directory or more than one.")
-            print("Please make sure there's exactly one 'logo.png' file in the root of the project directory you're trying to upload")
+            sly.logger.error("You either have no logo in the project directory or more than one.")
+            sly.logger.info("Got following logo paths: {}".format(logo_path))
             return 1
         logo_path = logo_path.pop()
-        logo_img = sly.image.read(logo_path)
+        logo_img = cv2.imread(logo_path)
         # Filter out logo file to avoid adding it to the dataset
         img_paths = [path for path in img_paths if not path.endswith(logo_file_name)]
         sly.logger.info(
@@ -131,22 +131,23 @@ def watermark(img, logo, watermark_text):
     #img[0:logo_height, :logo_height] = fsoco
     # print(img_height)
     img[(img_height - FSOCO_IMPORT_BORDER_THICKNESS):img_height - logo_border_diff, FSOCO_IMPORT_BORDER_THICKNESS:] = logo 
-    # Length of this static text (Arial) in pixel 
+    # Length of this static text (Vera) in pixel
     # See https://www.math.utah.edu/~beebe/fonts/afm-widths.html
-    txt_len  = 180 
+    txt_len = 250
     # Add text for creation and modification time
     # Text's anchor is its bottom left corner
-    text_anchor_top = (FSOCO_IMPORT_BORDER_THICKNESS, img_height - 30)
-    text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
-    
-    anchors = [text_anchor_top, text_anchor_bot]
-    texts = ["Uploaded to Supervisely on:", watermark_text]
+    text_anchor = (FSOCO_IMPORT_BORDER_THICKNESS, img_height - 30)
+    # text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
+
+    anchors = [text_anchor]
+    texts = ["Uploaded on:  UTC  " + watermark_text]
     img = draw_text_on_img(img, anchors, texts)
     return img
 
 
 def resize_logo(img_logo):
-
+    # Add black border to the top side to introduce a gap between the logo and the image
+    img_logo = cv2.copyMakeBorder(img_logo, 10, 0, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
     # Resize while keeping aspect ratio
     # FSOCO_IMPORT_LOGO_HEIGHT / image_height
     scale_pct = FSOCO_IMPORT_LOGO_HEIGHT / float(img_logo.shape[0])
