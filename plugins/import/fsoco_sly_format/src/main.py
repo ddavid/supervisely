@@ -14,9 +14,7 @@ import fsoco_lib.fsoco_watermark as fsoco
 def convert():
 
     task_settings = json.load(open(sly.TaskPaths.TASK_CONFIG_PATH, 'r'))
-    import_options = task_settings['options']
-    logo_file_name = import_options['watermark-logo']
-    #logo_img = cv2.imread(logo_file_name)
+    logo_file_name = "logo.png"
 
     try:
         project_cwd = sly.TaskPaths.DATA_DIR

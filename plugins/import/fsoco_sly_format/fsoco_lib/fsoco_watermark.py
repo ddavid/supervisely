@@ -59,7 +59,7 @@ def watermark(img, logo, watermark_text):
     text_anchor_bot = (FSOCO_IMPORT_BORDER_THICKNESS + txt_len, img_height - 30)
 
     anchors = [text_anchor_top, text_anchor_bot]
-    texts = ["Created on:", watermark_text]
+    texts = ["Uploaded on:", watermark_text]
     img = draw_text_on_img(img, anchors, texts)
     return img
 
