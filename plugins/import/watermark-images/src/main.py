@@ -53,7 +53,6 @@ def convert():
 
     convert_options = task_settings['options']
 
-    normalize_exif = convert_options.get('normalize_exif')
     logo_file_name = "logo.png"
 
     pr = sly.Project(os.path.join(sly.TaskPaths.RESULTS_DIR, task_settings['res_names']['project']),
@@ -66,7 +65,10 @@ def convert():
     for ds_name, img_paths in in_datasets.items():
         # Read watermark logo image
         logo_path = [path for path in img_paths if path.endswith(logo_file_name)]
-        assert(len(logo_path) is 1)
+        if len(logo_path) != 1:
+            print("You either have no logo in the project directory or more than one.")
+            print("Please make sure there's exactly one 'logo.png' file in the root of the project directory you're trying to upload")
+            return 1
         logo_path = logo_path.pop()
         logo_img = sly.image.read(logo_path)
         # Filter out logo file to avoid adding it to the dataset
@@ -84,15 +86,9 @@ def convert():
                         watermark_date = creation_time
                     item_name = os.path.basename(img_path)
 
-                    if normalize_exif:
-                        img = sly.image.read(img_path)
-                        img = watermark(img, logo_img, watermark_date)
-                        sly.image.write(img_path, img)
-                    
-                    else:
-                        img = cv2.imread(img_path)
-                        img = watermark(img, logo_img, watermark_date)
-                        cv2.imwrite(img_path, img)
+                    img = cv2.imread(img_path)
+                    img = watermark(img, logo_img, watermark_date)
+                    cv2.imwrite(img_path, img)
 
                 ds.add_item_file(item_name, img_path, _use_hardlink=True)
             except Exception as e:
