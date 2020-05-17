@@ -66,7 +66,7 @@ def watermark(img, logo, watermark_text):
 
 def resize_logo(img_logo):
     # Add black border to the top side to introduce a gap between the logo and the image
-    img_logo = cv2.copyMakeBorder(img_logo, 10, 0, 0, 0, cv.BORDER_CONSTANT, value=[0, 0, 0])
+    img_logo = cv2.copyMakeBorder(img_logo, 10, 0, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
     # Resize while keeping aspect ratio
     # FSOCO_IMPORT_LOGO_HEIGHT / image_height
     scale_pct = FSOCO_IMPORT_LOGO_HEIGHT / float(img_logo.shape[0])
