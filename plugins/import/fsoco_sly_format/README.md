@@ -8,6 +8,7 @@ The directory structure should be the following:
 ```
 my_project
 ├── meta.json
+├── logo.png
 ├── dataset_name_01
 │   ├── ann
 │   │   ├── img_x.json
