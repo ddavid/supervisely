@@ -18,7 +18,6 @@ If this plugin doesn't find a logo file or finds more than one possible version,
 ```
  my_folder1
     ├── logo.png
-    ├── meta.json
     ├── img_01.JPG
     ├── img_02.jpeg
     ├── ...
@@ -31,5 +30,6 @@ Should you run into any issues, please inspect the task's log file before contac
 
 ## Example Watermarked Images
 
-<img src="https://www.fsoco-dataset.com/assets/img/tools/watermarked_mms.jpg" alt="FSOCO watermark mucmotorsport image" width="600">
-<img src="https://www.fsoco-dataset.com/assets/img/tools/watermarked_amz.jpg" alt="FSOCO watermark amz image" width="600">
+<img src="https://i.ibb.co/thc1YyP/watermarked-mms.jpg" alt="FSOCO watermark mucmotorsport image" height="600">
+<img src="https://i.ibb.co/S5WF5pf/watermarked-amz.png" alt="FSOCO watermark amz image" height="600">
+<img src="https://i.ibb.co/LYTqn8R/watermarked-ff.jpg" alt="FSOCO watermark fast forest image" height="600">
