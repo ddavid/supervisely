@@ -6,6 +6,7 @@ Additionally, it will generate a watermark for the images with your team's logo 
 ## Watermark Details
 
 The generated watermark will consist of your team's logo and a timestamp.
+Borders for an additional `140px` on each edge will be added to the image. 
 The logo will be resized to a height of `100px`, while keeping the aspect ratio unchanged. To guarantee a crisp version of your logo and avoid unexpected distortions, use a version of your logo that fits these constraints.
 Furthermore, the background on which the logo will be placed is black. To guarantee a good result, use a version of your logo with a black background. 
 Transparency is not guaranteed to work; as creating a black background is very easy and fast, we have chosen not to increase the complexity of this tool to handle all minutiae of transparency with OpenCV.

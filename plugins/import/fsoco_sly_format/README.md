@@ -1,7 +1,7 @@
 # FSOCO Supervisely Import
 
 This plugin allows you to upload Projects that have previously been annotated on Supervisely or converted to Supervisely format from other annotation formats by using one of the [label converters](https://github.com/fsoco/fsoco/tree/master/tools/label_converters).
-More about Supervisely format can be read in the [annotation format documentation](https://docs.supervise.ly/ann_format/).
+More about Supervisely format can be read in the [annotation format documentation](https://docs.supervise.ly/data-organization/import-export/supervisely-format).
 
 The directory structure should be the following:
 
@@ -42,6 +42,7 @@ After generating a version of your dataset with a compatible subset of classes, 
 ## Watermark Details
 
 The generated watermark will consist of your team's logo and an UTC upload timestamp.
+Borders for an additional `140px` on each edge will be added to the image.
 The logo will be resized to a height of `100px`, while keeping the aspect ratio unchanged. To guarantee a crisp version of your logo and avoid unexpected distortions, use a version of your logo that fits these constraints.
 Furthermore, the background on which the logo will be placed is black.
 Transparency is not guaranteed to work; as creating a black background is very easy and fast, we have chosen not to increase the complexity of this tool to handle all minutiae of transparency with OpenCV.
