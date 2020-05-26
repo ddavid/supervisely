@@ -24,6 +24,10 @@ def convert():
         logo_path = os.path.join(project_cwd, logo_file_name)
         sly.logger.info('Trying to read logo file from path: {}'.format(logo_path))
         logo_img = cv2.imread(logo_path)
+        if not logo_img:
+             sly.logger.error("No logo file found in the root directory.")
+             sly.logger.info("Searched for the following logo path: {}".format(logo_path))
+             return 1
         watermark_project(project, logo_img)
     except FileNotFoundError:
         possible_projects = sly.fs.get_subdirs(sly.TaskPaths.DATA_DIR)
@@ -36,6 +40,11 @@ def convert():
         logo_path = os.path.join(project_cwd, logo_file_name)
         sly.logger.info('Trying to read logo file from path: {}'.format(logo_path))
         logo_img = cv2.imread(logo_path)
+        if not logo_img:
+             sly.logger.error("No logo file found in the root directory.")
+             sly.logger.info("Searched for the following logo path: {}".format(logo_path))
+             return 1
+
         watermark_project(project, logo_img)
     except Exception as e:
         raise e
@@ -93,13 +102,6 @@ def adjust_annotations(ann_paths, meta, progress):
             for label in temp_annotation._labels:
                 # Do stuff to labels
                 # Add border thickness once to each dimension of the bbox points.
-                # points: {interior_points, exterior_points} // exterior is empty for bboxes
-                # interior: list(bbox_point...)
-                # bbox_point: x, y
-            #    sly.logger.info('Label attributes: ', dir(label))
-                #for x, y in label['points']['interior']:
-                #    x += fsoco.FSOCO_IMPORT_BORDER_THICKNESS
-                #    y += fsoco.FSOCO_IMPORT_BORDER_THICKNESS
                 temp_label = label.translate(fsoco.FSOCO_IMPORT_BORDER_THICKNESS, fsoco.FSOCO_IMPORT_BORDER_THICKNESS)
                 temp_labels.append(temp_label)
             temp_annotation._labels = temp_labels
