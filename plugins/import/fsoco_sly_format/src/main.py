@@ -24,7 +24,7 @@ def convert():
         logo_path = os.path.join(project_cwd, logo_file_name)
         sly.logger.info('Trying to read logo file from path: {}'.format(logo_path))
         logo_img = cv2.imread(logo_path)
-        if not logo_img:
+        if not os.path.isfile(logo_path):
              sly.logger.error("No logo file found in the root directory.")
              sly.logger.info("Searched for the following logo path: {}".format(logo_path))
              return 1
@@ -40,7 +40,7 @@ def convert():
         logo_path = os.path.join(project_cwd, logo_file_name)
         sly.logger.info('Trying to read logo file from path: {}'.format(logo_path))
         logo_img = cv2.imread(logo_path)
-        if not logo_img:
+        if not os.path.isfile(logo_path):
              sly.logger.error("No logo file found in the root directory.")
              sly.logger.info("Searched for the following logo path: {}".format(logo_path))
              return 1
