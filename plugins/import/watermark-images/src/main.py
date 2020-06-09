@@ -71,6 +71,9 @@ def convert():
             return 1
         logo_path = logo_path.pop()
         logo_img = cv2.imread(logo_path)
+        if not logo_img:
+          sly.logger.error(
+            "Couldn't load logo image with path: {} . Please make sure your logo has the right file format.".format(logo_path))
         # Filter out logo file to avoid adding it to the dataset
         img_paths = [path for path in img_paths if not path.endswith(logo_file_name)]
         sly.logger.info(
@@ -79,16 +82,19 @@ def convert():
         progress = sly.Progress('Dataset: {!r}'.format(ds_name), len(img_paths))
         for img_path in img_paths:
             try:
-                if not img_path == logo_path:
-                    watermark_date = last_modified = time.ctime(os.path.getmtime(img_path))
-                    creation_time = time.ctime(os.path.getctime(img_path))
-                    if not last_modified:
-                        watermark_date = creation_time
-                    item_name = os.path.basename(img_path)
+                watermark_date = last_modified = time.ctime(os.path.getmtime(img_path))
+                creation_time = time.ctime(os.path.getctime(img_path))
+                if not last_modified:
+                    watermark_date = creation_time
+                item_name = os.path.basename(img_path)
 
-                    img = cv2.imread(img_path)
-                    img = watermark(img, logo_img, watermark_date)
-                    cv2.imwrite(img_path, img)
+                img = cv2.imread(img_path)
+                if not img:
+                   sly.logger.error("Couldn't load image with path: {} . Please make sure your images can be read by cv.imread()".format(img_path))
+                   break
+            
+                img = watermark(img, logo_img, watermark_date)
+                cv2.imwrite(img_path, img)
 
                 ds.add_item_file(item_name, img_path, _use_hardlink=True)
             except Exception as e:
