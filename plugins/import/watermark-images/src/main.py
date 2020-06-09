@@ -71,7 +71,7 @@ def convert():
             return 1
         logo_path = logo_path.pop()
         logo_img = cv2.imread(logo_path)
-        if not logo_img:
+        if isinstance(logo_img, type(None)):
           sly.logger.error(
             "Couldn't load logo image with path: {} . Please make sure your logo has the right file format.".format(logo_path))
         # Filter out logo file to avoid adding it to the dataset
@@ -89,7 +89,7 @@ def convert():
                 item_name = os.path.basename(img_path)
 
                 img = cv2.imread(img_path)
-                if not img:
+                if isinstance(img, type(None)):
                    sly.logger.error("Couldn't load image with path: {} . Please make sure your images can be read by cv.imread()".format(img_path))
                    break
             
